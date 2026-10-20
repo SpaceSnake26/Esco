@@ -1,0 +1,15 @@
+[Unit]
+Description=Esco — Spanish Quest API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/esco/server
+EnvironmentFile=/opt/esco/.env
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=3
+MemoryMax=400M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+{
+  "name": "spanish-quest",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build && npm --prefix server run build",
+    "start": "npm --prefix server run start",
+    "migrate": "npm --prefix server run migrate",
+    "seed": "npm --prefix server run seed",
+    "test": "npm --prefix server test && npm --prefix client test",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

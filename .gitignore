@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.superpowers/
+*.db
+*.db-journal
+*.sqlite
+.env
+.DS_Store
+*.db-shm
+*.db-wal
+data/

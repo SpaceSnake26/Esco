@@ -1,0 +1,36 @@
+{
+  "name": "server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "migrate": "tsx src/db/migrate.ts",
+    "seed": "tsx src/seed/profiles.ts && tsx src/seed/medellin.ts && tsx src/seed/phase4.ts && tsx src/seed/content/index.ts && tsx src/seed/badges.ts",
+    "db:generate": "drizzle-kit generate",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^10.0.0",
+    "@fastify/jwt": "^9.0.0",
+    "@fastify/static": "^8.0.0",
+    "@fastify/websocket": "^11.3.3",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.0.0",
+    "drizzle-orm": "^0.36.0",
+    "fastify": "^5.0.0",
+    "tsx": "^4.19.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.2",
+    "drizzle-kit": "^0.28.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "ws": "^8.22.0"
+  }
+}

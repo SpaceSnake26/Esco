@@ -1,0 +1,168 @@
+import type { StopContent } from "./upsert.js";
+
+// Stop ① Medellín — Greetings & basics (A1). Enrichment ADDED on top of the
+// original 8 vocab / 5 exercises / 1 dialogue / 1 agenda seeded by seedMedellin.
+export const medellinContent: StopContent = {
+  slug: "medellin",
+  vocab: [
+    // Greetings & farewells
+    { es: "Buenos días", en: "Good morning", example: "¡Buenos días! ¿Cómo amaneció?" },
+    { es: "Buenas tardes", en: "Good afternoon", example: "Buenas tardes, señora." },
+    { es: "Buenas noches", en: "Good night / evening", example: "Buenas noches, que descanse." },
+    { es: "Adiós", en: "Goodbye", example: "Adiós, nos vemos mañana." },
+    { es: "Chao", en: "Bye (casual)", example: "¡Chao, parcero!" },
+    { es: "Hasta luego", en: "See you later", example: "Me voy, ¡hasta luego!" },
+    { es: "Nos vemos", en: "See you", example: "Nos vemos el viernes." },
+    { es: "Bienvenido", en: "Welcome", example: "¡Bienvenido a Medellín!" },
+    // Courtesy
+    { es: "De nada", en: "You're welcome", example: "— Gracias. — ¡De nada!" },
+    { es: "Con gusto", en: "My pleasure", example: "Con gusto, parcero." },
+    { es: "Perdón", en: "Sorry", example: "Perdón, fue sin querer." },
+    { es: "Disculpe", en: "Excuse me (formal)", example: "Disculpe, ¿tiene un minuto?" },
+    { es: "Sí", en: "Yes", example: "Sí, claro." },
+    { es: "No", en: "No", example: "No, gracias." },
+    { es: "Tal vez", en: "Maybe", example: "Tal vez más tarde." },
+    // Introductions & identity
+    { es: "¿Cómo te llamas?", en: "What's your name? (informal)", example: "Hola, ¿cómo te llamas?" },
+    { es: "¿Cómo se llama?", en: "What's your name? (formal)", example: "Disculpe, ¿cómo se llama?" },
+    { es: "Soy de…", en: "I'm from…", example: "Soy de Suiza." },
+    { es: "Yo", en: "I", example: "Yo me llamo Fabio." },
+    { es: "Tú", en: "You (informal)", example: "¿Y tú, cómo estás?" },
+    { es: "Usted", en: "You (formal)", example: "¿Usted de dónde es?" },
+    { es: "Este es…", en: "This is… (m.)", example: "Este es mi amigo Aleks." },
+    // Small talk & feelings
+    { es: "Bien", en: "Fine / well", example: "Estoy bien, gracias." },
+    { es: "Muy bien", en: "Very well", example: "Muy bien, ¿y tú?" },
+    { es: "Más o menos", en: "So-so", example: "Hoy, más o menos." },
+    { es: "¿Y tú?", en: "And you? (informal)", example: "Bien, ¿y tú?" },
+    { es: "¿Qué tal?", en: "How's it going?", example: "¡Hola! ¿Qué tal?" },
+    { es: "¿De dónde eres?", en: "Where are you from?", example: "¿De dónde eres, parcero?" },
+    // Paisa flavour
+    { es: "Parcero", en: "Buddy / mate (Colombian)", example: "¿Todo bien, parcero?" },
+    { es: "¡Qué más!", en: "What's up! (paisa greeting)", example: "¡Qué más, pues!" },
+    { es: "Listo", en: "OK / ready / done", example: "Listo, vamos." },
+    { es: "Pues", en: "Well / so (paisa filler)", example: "Pues… no sé, parce." },
+  ],
+  grammar: [
+    {
+      title: "Subject pronouns & ser (to be)",
+      intro: "Use ser to say who you are and where you're from.",
+      points: [
+        { es: "yo soy", en: "I am" },
+        { es: "tú eres", en: "you are (informal)" },
+        { es: "usted es", en: "you are (formal)" },
+        { es: "él / ella es", en: "he / she is" },
+        { es: "nosotros somos", en: "we are" },
+        { es: "ellos son", en: "they are" },
+      ],
+    },
+    {
+      title: "El or la? (noun gender)",
+      intro: "Every noun is masculine (el) or feminine (la). Words ending in -o are usually el, in -a usually la.",
+      points: [
+        { es: "el tinto", en: "the (black) coffee — masculine" },
+        { es: "la arepa", en: "the arepa — feminine" },
+        { es: "el amigo / la amiga", en: "the friend (m. / f.)" },
+        { es: "la ciudad", en: "the city — feminine (exception)" },
+      ],
+    },
+    {
+      title: "Tú vs Usted",
+      intro: "Tú is casual (friends, your age). Usted is respectful (strangers, elders). Colombians use usted a lot.",
+      points: [
+        { es: "¿Cómo estás? (tú)", en: "How are you? — casual" },
+        { es: "¿Cómo está? (usted)", en: "How are you? — polite" },
+        { es: "¿De dónde eres? (tú)", en: "Where are you from? — casual" },
+        { es: "¿De dónde es? (usted)", en: "Where are you from? — polite" },
+      ],
+    },
+  ],
+  dialogues: [
+    {
+      title: "¿De dónde eres?",
+      lines: [
+        { who: "Ana", es: "¡Hola! ¿Cómo te llamas?", en: "Hi! What's your name?" },
+        { who: "Tú", es: "Me llamo Fabio. ¿Y tú?", en: "My name is Fabio. And you?" },
+        { who: "Ana", es: "Soy Ana. ¿De dónde eres?", en: "I'm Ana. Where are you from?" },
+        { who: "Tú", es: "Soy de Suiza. ¿Y tú de dónde eres?", en: "I'm from Switzerland. And where are you from?" },
+        { who: "Ana", es: "Soy de Medellín, paisa de corazón.", en: "I'm from Medellín, paisa at heart." },
+        { who: "Tú", es: "¡Mucho gusto, Ana!", en: "Nice to meet you, Ana!" },
+      ],
+    },
+    {
+      title: "¡Qué más, parce!",
+      lines: [
+        { who: "Aleks", es: "¡Qué más, parcero! ¿Todo bien?", en: "What's up, buddy! All good?" },
+        { who: "Tú", es: "¡Todo bien, pues! ¿Y vos?", en: "All good! And you?" },
+        { who: "Aleks", es: "Muy bien. ¿Un tinto?", en: "Very well. A coffee?" },
+        { who: "Tú", es: "¡Listo! Con gusto.", en: "Sure! Gladly." },
+        { who: "Aleks", es: "De una. Vamos.", en: "Right away. Let's go." },
+      ],
+    },
+  ],
+  homeworks: [
+    {
+      title: "Tarea 2: Saludos y despedidas",
+      exercises: [
+        { type: "multiple_choice", prompt: "Say 'Good morning'.", answer: "Buenos días",
+          optionsJson: ["Buenas noches", "Buenos días", "Hasta luego", "De nada"], points: 10 },
+        { type: "multiple_choice", prompt: "How do you say 'Good night / evening'?", answer: "Buenas noches",
+          optionsJson: ["Buenas noches", "Buenos días", "Buenas tardes", "Bienvenido"], points: 10 },
+        { type: "multiple_choice", prompt: "A casual way to say 'Bye' in Colombia is…", answer: "Chao",
+          optionsJson: ["Perdón", "Sí", "Chao", "Soy de"], points: 10 },
+        { type: "multiple_choice", prompt: "Someone says 'Gracias'. You reply…", answer: "De nada",
+          optionsJson: ["Con permiso", "De nada", "Buenas tardes", "Tal vez"], points: 10 },
+        { type: "multiple_choice", prompt: "'Hasta luego' means…", answer: "See you later",
+          optionsJson: ["Good morning", "Welcome", "See you later", "Excuse me"], points: 10 },
+        { type: "multiple_choice", prompt: "Which is 'Welcome'?", answer: "Bienvenido",
+          optionsJson: ["Bienvenido", "Buenas", "Nos vemos", "Perdón"], points: 10 },
+        { type: "fill_blank", prompt: "'See you (soon)': Nos ____.", answer: "vemos", optionsJson: null, points: 10 },
+        { type: "fill_blank", prompt: "Polite 'Excuse me' to get attention: ____.", answer: "Disculpe", optionsJson: null, points: 15 },
+        { type: "fill_blank", prompt: "'Good afternoon': Buenas ____.", answer: "tardes", optionsJson: null, points: 10 },
+        { type: "fill_blank", prompt: "Reply to thanks (paisa): Con ____.", answer: "gusto", optionsJson: null, points: 10 },
+        { type: "multiple_choice", prompt: "'Maybe later' — which word is 'maybe'?", answer: "Tal vez",
+          optionsJson: ["Listo", "Tal vez", "Pues", "Sí"], points: 10 },
+        { type: "multiple_choice", prompt: "Casual paisa greeting 'What's up!' is…", answer: "¡Qué más!",
+          optionsJson: ["¡Qué más!", "¡Bienvenido!", "¡De nada!", "¡Buenas noches!"], points: 10 },
+        { type: "fill_blank", prompt: "'Sorry' (one word): ____.", answer: "Perdón", optionsJson: null, points: 10 },
+      ],
+    },
+    {
+      title: "Tarea 3: Presentarse",
+      exercises: [
+        { type: "multiple_choice", prompt: "Ask a friend their name (informal).", answer: "¿Cómo te llamas?",
+          optionsJson: ["¿Cómo se llama?", "¿Cómo te llamas?", "¿De dónde es?", "¿Qué tal?"], points: 15 },
+        { type: "multiple_choice", prompt: "Ask politely (formal) for someone's name.", answer: "¿Cómo se llama?",
+          optionsJson: ["¿Cómo se llama?", "¿Cómo te llamas?", "¿Y tú?", "¿Qué más?"], points: 15 },
+        { type: "multiple_choice", prompt: "'I'm from Switzerland' =", answer: "Soy de Suiza",
+          optionsJson: ["Soy Suiza", "Estoy de Suiza", "Soy de Suiza", "Me llamo Suiza"], points: 15 },
+        { type: "multiple_choice", prompt: "Which pronoun means the formal 'you'?", answer: "Usted",
+          optionsJson: ["Yo", "Tú", "Usted", "Ella"], points: 10 },
+        { type: "multiple_choice", prompt: "Correct form: 'Yo ____ Fabio.'", answer: "soy",
+          optionsJson: ["eres", "es", "soy", "son"], points: 15 },
+        { type: "multiple_choice", prompt: "Correct form: 'Tú ____ de Medellín.'", answer: "eres",
+          optionsJson: ["soy", "eres", "es", "somos"], points: 15 },
+        { type: "fill_blank", prompt: "Reply 'And you?' informally: ¿Y ____?", answer: "tú", optionsJson: null, points: 10 },
+        { type: "fill_blank", prompt: "'Where are you from?' (informal): ¿De dónde ____?", answer: "eres", optionsJson: null, points: 15 },
+        { type: "fill_blank", prompt: "Introduce a male friend: ____ es mi amigo.", answer: "Este", optionsJson: null, points: 15 },
+        { type: "multiple_choice", prompt: "'¿Qué tal?' is closest to…", answer: "How's it going?",
+          optionsJson: ["What's your name?", "How's it going?", "Where are you?", "How old are you?"], points: 10 },
+        { type: "multiple_choice", prompt: "Pick the correct article: '____ arepa'.", answer: "la",
+          optionsJson: ["el", "la", "los", "un"], points: 10 },
+        { type: "multiple_choice", prompt: "Pick the correct article: '____ tinto'.", answer: "el",
+          optionsJson: ["la", "el", "las", "una"], points: 10 },
+      ],
+    },
+  ],
+  agendas: [
+    {
+      order: 2,
+      steps: [
+        { minutes: 10, title: "Repaso", instructions: "Quick round: each person greets the others 3 different ways (buenos días, qué más, buenas)." },
+        { minutes: 15, title: "Presentaciones", instructions: "Introduce yourself fully in Spanish: name, where you're from, how you are. Use usted with one person, tú with another." },
+        { minutes: 20, title: "Juego: ser", instructions: "One person says a pronoun (yo/tú/usted/ella), the others race to give the right form of ser." },
+        { minutes: 15, title: "Role-play", instructions: "Act out meeting a stranger at a café in Medellín: greet, names, origins, order a tinto, say goodbye." },
+      ],
+    },
+  ],
+};
