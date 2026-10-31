@@ -1,0 +1,6 @@
+[Unit]
+Description=Esco: check Pablito's Kimi account and alert via Hermes Telegram
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/node /opt/esco/scripts/esco-ai-watch.mjs

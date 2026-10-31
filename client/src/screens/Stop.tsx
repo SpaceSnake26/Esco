@@ -30,7 +30,7 @@ export function Stop() {
       <main style={{ flex: 1, padding: 14, display: "grid", gap: 14 }}>
         {locked ? (
           <section style={{ background: "#fff", borderRadius: 14, padding: 16 }}>
-            <p>🔒 This stop is locked. Finish the previous stop (80% of its homework) to open it.</p>
+            <p>🔒 This stop is locked. Finish the previous stop (60% of its homework) to open it.</p>
             <Link to="/ruta" style={{ color: "#0a6e5c", fontWeight: 700 }}>← Back to the route</Link>
           </section>
         ) : (
@@ -44,7 +44,7 @@ export function Stop() {
                 <span style={{ fontSize: 13, color: "#999" }}>Hear these words →</span>
               </Link>
               {hasHomework && (
-                <Link to="/tarea" style={cardLink}>
+                <Link to={`/tarea?stop=${regionId}`} style={cardLink}>
                   <span style={{ fontWeight: 700 }}>📚 Homework</span>
                   <span style={{ fontSize: 13, color: "#999" }}>Practice & earn points →</span>
                 </Link>

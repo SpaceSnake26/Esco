@@ -47,3 +47,26 @@ test("leaderboard reflects awarded points", async () => {
   const rows = res.json();
   expect(rows.find((r: any) => r.userId === 2).points).toBeGreaterThan(0);
 });
+
+test("a wrong answer can be retried, and reaching 60% correct unlocks the next stop", async () => {
+  const igor = (await app.inject({ method: "POST", url: "/api/auth/login", payload: { userId: 3, pin: "333333" } }))
+    .cookies.find((c: any) => c.name === "token").value;
+  const regions = () => app.inject({ method: "GET", url: "/api/regions", cookies: { token: igor } }).then((r: any) => r.json());
+  const before = await regions();
+  expect(before[1].status).toBe("locked");
+  const { total, needed } = before[0];
+  expect(needed).toBe(Math.ceil(total * 0.6));
+
+  const lessons = (await app.inject({ method: "GET", url: `/api/regions/${before[0].id}`, cookies: { token: igor } })).json().lessons;
+  const ids = lessons.flatMap((l: any) => l.exercises.map((e: any) => e.id));
+  for (const id of ids.slice(0, needed)) {
+    const wrong = (await app.inject({ method: "POST", url: "/api/attempts", cookies: { token: igor },
+      payload: { exerciseId: id, answer: "zzz" } })).json();
+    expect(wrong.correct).toBe(false);
+    await app.inject({ method: "POST", url: "/api/attempts", cookies: { token: igor },
+      payload: { exerciseId: id, answer: wrong.correctAnswer } });
+  }
+  const after = await regions();
+  expect(after[0]).toMatchObject({ status: "complete", correct: needed });
+  expect(after[1].status).toBe("current");
+});

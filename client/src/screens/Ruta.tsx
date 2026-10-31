@@ -45,10 +45,10 @@ export function Ruta() {
                   <b style={{ color: "#fff", fontSize: 17 }}>{r.order}. {r.name}</b>
                   <div style={{ fontSize: 13, color: "#e3f4ef" }}>{r.theme}</div>
                   {r.status === "locked" && prev && (
-                    <div style={{ fontSize: 12, color: "#ffd0b0" }}>🔒 Finish {prev.name}</div>
+                    <div style={{ fontSize: 12, color: "#ffd0b0" }}>🔒 Get {prev.needed} correct in {prev.name}</div>
                   )}
                   {r.status === "current" && (
-                    <div style={{ fontSize: 12, color: "#ffe08a", fontWeight: 700 }}>You're here · tap →</div>
+                    <div style={{ fontSize: 12, color: "#ffe08a", fontWeight: 700 }}>You're here · {r.correct}/{r.needed} correct to unlock next</div>
                   )}
                   {r.status === "complete" && (
                     <div style={{ fontSize: 12, color: "#aef0b8", fontWeight: 700 }}>Done · tap →</div>

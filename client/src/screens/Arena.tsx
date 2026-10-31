@@ -48,7 +48,7 @@ export function Arena({ user }: { user: PublicUser }) {
     }
   }, [game.connected, region, enter]);
 
-  useEffect(() => { setLocalAnswered(false); }, [game.question?.index]);
+  useEffect(() => { setLocalAnswered(false); }, [game.question?.index, game.status === "lobby"]);
   const answered = localAnswered || game.answeredUserIds.includes(user.id);
 
   function pick(index: number) {
@@ -208,6 +208,19 @@ export function Arena({ user }: { user: PublicUser }) {
       })()}
 
       {game.error && <p style={{ color: "#ff9a9a", textAlign: "center", fontSize: 15 }}>{game.error}</p>}
+
+      {game.connected && (
+        <button
+          onClick={() => {
+            if (window.confirm("Reset El Reto? This ends the current game for everyone and starts a new lobby. Points already earned stay.")) {
+              game.actions.reset(region?.id ?? 0);
+            }
+          }}
+          style={{ marginTop: 16, alignSelf: "center", background: "none", border: "1px solid rgba(255,255,255,0.4)", color: "#fff", borderRadius: 10, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}
+        >
+          🔄 Reset game
+        </button>
+      )}
     </div>
   );
 }

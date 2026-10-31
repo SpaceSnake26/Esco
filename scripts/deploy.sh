@@ -15,6 +15,6 @@ echo "→ installing deps (root + server + client), building, migrating, seeding
 ssh "$VPS" "cd $DEST && npm install && npm --prefix server install && npm --prefix client install && npm run build && npm run migrate && (npm run seed || true)"
 
 echo "→ installing/refreshing systemd unit"
-ssh "$VPS" "cp $DEST/scripts/esco-api.service /etc/systemd/system/ && systemctl daemon-reload && systemctl enable --now esco-api && systemctl restart esco-api"
+ssh "$VPS" "cp $DEST/scripts/esco-api.service $DEST/scripts/esco-ai-watch.service $DEST/scripts/esco-ai-watch.timer /etc/systemd/system/ && systemctl daemon-reload && systemctl enable --now esco-api esco-ai-watch.timer && systemctl restart esco-api"
 
 echo "→ done. Check: systemctl status esco-api && curl -s https://esco.alpbot.ch/api/health"

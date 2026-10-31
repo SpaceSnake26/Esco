@@ -13,6 +13,7 @@ export type LiveReveal = Extract<LiveServerEvent, { t: "reveal" }>;
 
 export interface LiveActions {
   enter: (regionId: number) => void;
+  reset: (regionId: number) => void;
   create: (regionId: number) => void;
   join: () => void;
   start: () => void;
@@ -125,6 +126,7 @@ export function useLiveGame(): LiveGame {
   }, []);
 
   const enter = useCallback((regionId: number) => sendMsg({ t: "enter", regionId }), [sendMsg]);
+  const reset = useCallback((regionId: number) => sendMsg({ t: "host:reset", regionId }), [sendMsg]);
   const create = useCallback((regionId: number) => sendMsg({ t: "host:create", regionId }), [sendMsg]);
   const join = useCallback(() => sendMsg({ t: "join" }), [sendMsg]);
   const start = useCallback(() => sendMsg({ t: "host:start" }), [sendMsg]);
@@ -133,8 +135,8 @@ export function useLiveGame(): LiveGame {
   const answer = useCallback((index: number) => sendMsg({ t: "answer", index }), [sendMsg]);
 
   const actions = useMemo<LiveActions>(
-    () => ({ enter, create, join, start, next, reveal: revealAction, answer }),
-    [enter, create, join, start, next, revealAction, answer],
+    () => ({ enter, reset, create, join, start, next, reveal: revealAction, answer }),
+    [enter, reset, create, join, start, next, revealAction, answer],
   );
 
   return {

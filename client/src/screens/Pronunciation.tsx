@@ -15,7 +15,7 @@ export function Pronunciation() {
     queryFn: () => api.vocab(region!.id),
   });
 
-  const { supported, gender, setGender, speak, stop, speaking, hasBothGenders, activeVoiceName } = useSpeech();
+  const { supported, gender, setGender, speak, stop, speaking, voiceLabel } = useSpeech();
   const [playingAll, setPlayingAll] = useState(false);
   const timers = useRef<number[]>([]);
 
@@ -64,10 +64,7 @@ export function Pronunciation() {
                   <VoiceBtn active={gender === "male"} onClick={() => setGender("male")} label="🚹 Male" />
                 </div>
                 <div style={{ fontSize: 11, color: "#999", marginTop: 6 }}>
-                  {activeVoiceName ? `Voice: ${activeVoiceName}` : "Using the default Spanish voice"}
-                  {!hasBothGenders && (
-                    <> · only one Spanish voice on this device, so the toggle shifts the tone. Add a 2nd voice: iPhone → Settings › Accessibility › Spoken Content › Voices › Spanish; Android → Settings › Text-to-speech.</>
-                  )}
+                  Voice: {voiceLabel}
                 </div>
               </div>
               <button

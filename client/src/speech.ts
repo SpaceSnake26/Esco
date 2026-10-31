@@ -5,7 +5,7 @@ export type Gender = "female" | "male";
 // Heuristic: the Web Speech API exposes no gender field, so we match known
 // Spanish voice names. Covers Apple (iOS/macOS), Google (Android/Chrome) and
 // Microsoft (Windows/Edge) Spanish voices.
-const FEMALE = /m[oó]nica|paulina|marisol|esperanza|luc[ií]a|sabina|catalina|ang[eé]lica|helena|laura|dalia|salom[eé]|paloma|elena|google espa/i;
+const FEMALE = /m[oó]nica|paulina|marisol|esperanza|luc[ií]a|sabina|catalina|ang[eé]lica|helena|laura|dalia|salom[eé]|paloma|elena|elvira|ximena|paola|google espa/i;
 const MALE = /jorge|diego|juan|carlos|pablo|ra[uú]l|miguel|pedro|gonzalo|dar[ií]o|enrique|andr[eé]s/i;
 
 function isSupported(): boolean {
@@ -26,7 +26,8 @@ function pickVoice(voices: SpeechSynthesisVoice[], gender: Gender): SpeechSynthe
   // If that gender isn't present, fall back to the SAME single base voice for
   // both toggles (differentiated by pitch below) — never guess by list order,
   // which is what made the labels appear swapped on some devices.
-  if (gender === "female") return female ?? male ?? voices[0];
+  // Device-voice fallback only; normally the neural /api/tts voices play instead.
+  if (gender === "female") return female ?? voices.find((v) => !MALE.test(v.name)) ?? voices[0];
   return male ?? female ?? voices[0];
 }
 
@@ -35,61 +36,64 @@ function hasTwoGenderVoices(voices: SpeechSynthesisVoice[]): boolean {
   return voices.some((v) => FEMALE.test(v.name)) && voices.some((v) => MALE.test(v.name));
 }
 
+export const VOICE_LABEL: Record<Gender, string> = { female: "Salomé (Colombia)", male: "Gonzalo (Colombia)" };
+
 /**
- * Text-to-speech for the "Listen & repeat" drill. Reads Spanish slowly and warmly.
- * `gender` swaps between a female / male Spanish voice where the device provides them;
- * if only one voice exists it stays usable and nudges the pitch to differentiate.
+ * "Listen & repeat" audio. Plays the server's Colombian neural voices, which sound
+ * the same on every device; falls back to the device's own Spanish voice if the
+ * server audio fails, so the button always makes a sound.
  */
 export function useSpeech() {
-  const supported = isSupported();
+  const supported = typeof Audio !== "undefined" || isSupported();
   const [gender, setGender] = useState<Gender>("female");
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>(() => spanishVoices());
   const [speaking, setSpeaking] = useState<string | null>(null);
   const genderRef = useRef(gender);
   genderRef.current = gender;
-
-  useEffect(() => {
-    if (!supported) return;
-    const load = () => setVoices(spanishVoices());
-    load();
-    window.speechSynthesis.addEventListener("voiceschanged", load);
-    return () => {
-      window.speechSynthesis.removeEventListener("voiceschanged", load);
-      window.speechSynthesis.cancel();
-    };
-  }, [supported]);
-
-  const speak = useCallback((text: string) => {
-    if (!supported || !text) return;
-    const synth = window.speechSynthesis;
-    synth.cancel(); // stop anything already playing
-    const u = new SpeechSynthesisUtterance(text);
-    const g = genderRef.current;
-    const voicesNow = spanishVoices();
-    const bothReal = hasTwoGenderVoices(voicesNow);
-    const voice = pickVoice(voicesNow, g);
-    if (voice) u.voice = voice;
-    u.lang = voice?.lang ?? "es-ES";
-    u.rate = 0.85; // slow enough to repeat after
-    // Two real voices already differ, so keep pitch near-natural. With only one
-    // voice, exaggerate the pitch so male clearly sounds lower than female.
-    if (bothReal) u.pitch = g === "female" ? 1.05 : 0.95;
-    else u.pitch = g === "female" ? 1.25 : 0.7;
-    u.onstart = () => setSpeaking(text);
-    u.onend = () => setSpeaking((cur) => (cur === text ? null : cur));
-    u.onerror = () => setSpeaking((cur) => (cur === text ? null : cur));
-    synth.speak(u);
-  }, [supported]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tapRef = useRef(0);
 
   const stop = useCallback(() => {
-    if (!supported) return;
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.onerror = audioRef.current.onended = null;
+      audioRef.current.pause();
+    }
+    if (isSupported()) window.speechSynthesis.cancel();
     setSpeaking(null);
-  }, [supported]);
+  }, []);
+  useEffect(() => stop, [stop]);
 
-  const hasBothGenders = hasTwoGenderVoices(voices);
-  // The voice name actually used for the current gender (for a transparent UI label).
-  const activeVoiceName = pickVoice(voices, gender)?.name ?? null;
+  const deviceSpeak = useCallback((text: string, g: Gender) => {
+    if (!isSupported()) { setSpeaking(null); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    const voices = spanishVoices();
+    const voice = pickVoice(voices, g);
+    if (voice) u.voice = voice;
+    u.lang = voice?.lang ?? "es-ES";
+    u.rate = 0.85;
+    // Two real voices already differ; with one voice, exaggerate the pitch instead.
+    u.pitch = hasTwoGenderVoices(voices) ? (g === "female" ? 1.05 : 0.95) : (g === "female" ? 1.4 : 0.7);
+    u.onstart = () => setSpeaking(text);
+    u.onend = u.onerror = () => setSpeaking((cur) => (cur === text ? null : cur));
+    window.speechSynthesis.speak(u);
+  }, []);
 
-  return { supported, gender, setGender, speak, stop, speaking, voiceCount: voices.length, hasBothGenders, activeVoiceName };
+  const speak = useCallback((text: string) => {
+    if (!text) return;
+    stop();
+    setSpeaking(text);
+    // Reuse one element: iOS only allows audio on an element first played from a tap.
+    const a = audioRef.current ?? (audioRef.current = new Audio());
+    a.onended = () => setSpeaking((cur) => (cur === text ? null : cur));
+    const g = genderRef.current;
+    const tap = ++tapRef.current;
+    let fell = false;
+    // Only the latest tap may fall back, in the voice chosen when it was tapped.
+    const fallback = () => { if (!fell && tap === tapRef.current) { fell = true; deviceSpeak(text, g); } };
+    a.onerror = fallback;
+    a.src = `/api/tts?voice=${g}&text=${encodeURIComponent(text)}`;
+    // AbortError only means a newer tap interrupted this one: no fallback for that.
+    Promise.resolve(a.play()).catch((e) => { if (e?.name !== "AbortError") fallback(); });
+  }, [stop, deviceSpeak]);
+
+  return { supported, gender, setGender, speak, stop, speaking, voiceLabel: VOICE_LABEL[gender] };
 }

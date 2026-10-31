@@ -186,6 +186,11 @@ export class LiveRoom {
    * Lets the server resync a client instead of ever erroring with "Game already
    * started" — a late/duplicate action just snaps the caller to what's happening now.
    */
+  syncEvents(): LiveEvent[] {
+    // The results screen also needs the question it is showing the answer to.
+    return this.status === "reveal" ? [this.questionEvent(), this.syncEvent()] : [this.syncEvent()];
+  }
+
   syncEvent(): LiveEvent {
     switch (this.status) {
       case "question": return this.questionEvent();

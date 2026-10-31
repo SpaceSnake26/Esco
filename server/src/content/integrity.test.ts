@@ -73,4 +73,14 @@ describe("content integrity", () => {
       }
     }
   });
+
+  test("the curriculum keeps its 70% expansion volume", () => {
+    const count = (t: any) => db.select().from(t).all().length;
+    const kinds = db.select().from(schema.lessons).all();
+    expect(count(schema.vocab)).toBeGreaterThanOrEqual(408);
+    expect(count(schema.exercises)).toBeGreaterThanOrEqual(401);
+    expect(kinds.filter((l) => l.kind === "dialogue").length).toBeGreaterThanOrEqual(31);
+    expect(kinds.filter((l) => l.kind === "grammar").length).toBeGreaterThanOrEqual(31);
+    expect(count(schema.schoolSessions)).toBeGreaterThanOrEqual(21);
+  });
 });

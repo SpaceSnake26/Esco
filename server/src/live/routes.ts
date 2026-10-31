@@ -30,6 +30,20 @@ export async function liveRoutes(app: FastifyInstance) {
     }
   }
 
+  function sendSync(socket: WebSocket) {
+    for (const ev of room.syncEvents()) send(socket, ev);
+  }
+
+  // Everyone with El Reto open is in the game, even if only one person tapped
+  // "Play again" or "Reset": nobody ends up watching a game they can't answer in.
+  function freshGame(userId: number, regionId: number): LiveEvent {
+    const ev = room.create(userId, regionId);
+    if (ev.t === "error") return ev;
+    let lobby: LiveEvent = ev;
+    for (const id of new Set([userId, ...sockets.values()])) lobby = room.join(id);
+    return lobby;
+  }
+
   // A room action's result: errors go only to the caller; real events to everyone.
   function result(socket: WebSocket, ev: LiveEvent) {
     if (ev.t === "error") send(socket, ev);
@@ -50,7 +64,7 @@ export async function liveRoutes(app: FastifyInstance) {
 
     // A (re)connecting socket immediately sees whatever is happening now, so a
     // dropped phone rejoining mid-game lands straight back in the action.
-    if (room.hostUserId !== 0) send(socket, room.syncEvent());
+    if (room.hostUserId !== 0) sendSync(socket);
 
     socket.on("close", () => {
       sockets.delete(socket);
@@ -72,16 +86,14 @@ export async function liveRoutes(app: FastifyInstance) {
         case "enter": {
           // No game yet, or the last one ended → THIS user starts a fresh room.
           if (room.hostUserId === 0 || room.status === "ended") {
-            const ev = room.create(userId, msg.regionId ?? 0);
-            if (ev.t === "error") { send(socket, ev); break; }
-            broadcast(room.join(userId));
+            result(socket, freshGame(userId, msg.regionId ?? 0));
           } else if (room.status === "lobby") {
             broadcast(room.join(userId)); // still gathering → update the lobby for all
           } else {
             // A game is in progress: add this player quietly and sync ONLY them to
             // the live question — never yank everyone else back to the lobby.
             room.join(userId);
-            send(socket, room.syncEvent());
+            sendSync(socket);
           }
           break;
         }
@@ -104,15 +116,19 @@ export async function liveRoutes(app: FastifyInstance) {
             broadcast(room.start());
           } else if (room.status === "ended" || room.hostUserId === 0) {
             const regionId = room.regionId || msg.regionId || 0;
-            const ev = room.create(userId, regionId);
+            const ev = freshGame(userId, regionId);
             if (ev.t === "error") { send(socket, ev); break; }
-            room.join(userId);
             broadcast(room.start());
           } else {
-            send(socket, room.syncEvent()); // already in progress → snap caller to it
+            sendSync(socket); // already in progress → snap caller to it
           }
           break;
         }
+        // The way out of a stuck or old game: everyone goes back to a fresh lobby.
+        // Points already earned stay on the leaderboard.
+        case "host:reset":
+          result(socket, freshGame(userId, room.regionId || msg.regionId || 0));
+          break;
         case "host:next":
           result(socket, room.next());
           break;
@@ -124,6 +140,7 @@ export async function liveRoutes(app: FastifyInstance) {
           }
           break;
         case "answer": {
+          room.join(userId); // someone who arrived late still gets to play
           const ev = room.answer(userId, msg.index ?? -1);
           if (ev.t === "error") {
             send(socket, ev);

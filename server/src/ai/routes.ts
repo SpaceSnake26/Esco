@@ -37,12 +37,12 @@ export async function aiRoutes(app: FastifyInstance) {
       return { reply: practiceReply(opts, turns), degraded: true };
     }
 
-    const result = await pablitoChat(turns, opts, req.log);
+    const result = await pablitoChat(turns, opts, { warn: (m) => console.warn(m) });
 
     // Always answer (HTTP 200). If the AI is unavailable, log WHY and fall back
     // to a friendly in-character practice line so the chat never dead-ends.
     if ("error" in result) {
-      req.log.warn(`pablito unavailable → practice mode: ${result.reason}`);
+      console.warn(`pablito unavailable → practice mode: ${result.reason}`);
       return { reply: practiceReply(opts, turns), degraded: true };
     }
     bumpAiUsage(day); // count only successful (paid) calls

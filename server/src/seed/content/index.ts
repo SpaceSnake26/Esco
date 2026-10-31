@@ -2,6 +2,7 @@ import { pathToFileURL } from "node:url";
 import { barranquillaContent } from "./barranquilla.js";
 import { cartagenaContent } from "./cartagena.js";
 import { challengeContent } from "./challenge.js";
+import { expansionContent } from "./expansion.js";
 import { medellinContent } from "./medellin.js";
 import { medellinFinaleContent } from "./medellin-finale.js";
 import { santaMartaContent } from "./santa-marta.js";
@@ -14,6 +15,7 @@ const STOPS = [
   medellinContent, cartagenaContent, barranquillaContent,
   santaMartaContent, sierraNevadaContent, medellinFinaleContent,
   ...challengeContent,
+  ...expansionContent,
 ];
 
 export function seedCurriculum() {

@@ -4,7 +4,7 @@ import { db, schema } from "../db/client.js";
 
 // A stop unlocks the next once the player has answered this share of its
 // exercises correctly — mastery without demanding a perfect 100%.
-export const REGION_UNLOCK_THRESHOLD = 0.8;
+export const REGION_UNLOCK_THRESHOLD = 0.6;
 
 /** A region is "complete" (unlocks the next) when ≥ THRESHOLD of its exercises are correct. */
 export function regionExerciseIds(regionId: number): number[] {
@@ -15,25 +15,31 @@ export function regionExerciseIds(regionId: number): number[] {
     .where(inArray(schema.exercises.lessonId, lessons.map((l) => l.id))).all().map((e) => e.id);
 }
 
-export function isRegionComplete(userId: number, regionId: number): boolean {
+/** A player's homework progress in a stop: correct so far, total, and how many unlock the next. */
+export function regionProgress(userId: number, regionId: number): { correct: number; total: number; needed: number } {
   const exIds = regionExerciseIds(regionId);
-  // A region with no exercises (e.g. a placeholder future stop) is never "complete",
-  // so it reads as locked and does not unlock the stops after it.
-  if (exIds.length === 0) return false;
+  if (exIds.length === 0) return { correct: 0, total: 0, needed: 0 };
   const correct = db.select({ id: schema.progress.id }).from(schema.progress)
     .where(and(eq(schema.progress.userId, userId), inArray(schema.progress.exerciseId, exIds),
-      eq(schema.progress.correct, true))).all();
-  return correct.length >= Math.ceil(exIds.length * REGION_UNLOCK_THRESHOLD);
+      eq(schema.progress.correct, true))).all().length;
+  return { correct, total: exIds.length, needed: Math.ceil(exIds.length * REGION_UNLOCK_THRESHOLD) };
+}
+
+export function isRegionComplete(userId: number, regionId: number): boolean {
+  const { correct, total, needed } = regionProgress(userId, regionId);
+  // A region with no exercises is never "complete", so it can't unlock the stops after it.
+  return total > 0 && correct >= needed;
 }
 
 export function regionStatuses(userId: number): RegionDTO[] {
   const regions = db.select().from(schema.regions).orderBy(schema.regions.order).all();
   let prevComplete = true; // first region is always unlocked
   return regions.map((r) => {
-    const complete = isRegionComplete(userId, r.id);
+    const progress = regionProgress(userId, r.id);
+    const complete = progress.total > 0 && progress.correct >= progress.needed;
     const status: "locked" | "current" | "complete" = complete ? "complete" : prevComplete ? "current" : "locked";
     prevComplete = complete;
-    return { id: r.id, order: r.order, slug: r.slug, name: r.name, theme: r.theme, status };
+    return { id: r.id, order: r.order, slug: r.slug, name: r.name, theme: r.theme, status, ...progress };
   });
 }
 

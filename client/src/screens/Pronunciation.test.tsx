@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeAll, expect, test, vi } from "vitest";
@@ -7,6 +7,9 @@ import { beforeAll, expect, test, vi } from "vitest";
 // Stub the Web Speech API (jsdom has none) so the screen renders its full UI.
 const speakSpy = vi.fn();
 beforeAll(() => {
+  // Server audio "fails" here, exercising the device-voice fallback.
+  window.HTMLMediaElement.prototype.play = () => Promise.reject(new Error("no audio"));
+  window.HTMLMediaElement.prototype.pause = () => {};
   class U {
     text: string; voice: unknown = null; lang = ""; rate = 1; pitch = 1;
     onstart: (() => void) | null = null; onend: (() => void) | null = null; onerror: (() => void) | null = null;
@@ -51,7 +54,7 @@ test("lists the current region's vocab with play buttons", async () => {
 test("tapping a word's play button speaks the Spanish", async () => {
   render(wrap(<Pronunciation />));
   fireEvent.click(await screen.findByLabelText("Play Gracias"));
-  expect(speakSpy).toHaveBeenCalledWith("Gracias");
+  await waitFor(() => expect(speakSpy).toHaveBeenCalledWith("Gracias"));
 });
 
 test("has a male/female voice toggle", async () => {
@@ -69,9 +72,9 @@ test("female uses the female voice, male uses the male voice (not swapped)", asy
   render(wrap(<Pronunciation />));
   // Default is female → Mónica.
   fireEvent.click(await screen.findByLabelText("Play Hola"));
+  await waitFor(() => expect(picked).toEqual(["Mónica"]));
   // Switch to male → Jorge.
   fireEvent.click(screen.getByText("🚹 Male"));
   fireEvent.click(screen.getByLabelText("Play Hola"));
-  expect(picked[0]).toBe("Mónica");
-  expect(picked[1]).toBe("Jorge");
+  await waitFor(() => expect(picked).toEqual(["Mónica", "Jorge"]));
 });

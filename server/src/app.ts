@@ -9,6 +9,7 @@ import { contentRoutes } from "./content/routes.js";
 import { liveRoutes } from "./live/routes.js";
 import { questsRoutes } from "./quests/routes.js";
 import { schoolRoutes } from "./school/routes.js";
+import { ttsRoutes } from "./tts/routes.js";
 import { scoringRoutes } from "./scoring/routes.js";
 
 export function buildApp(): FastifyInstance {
@@ -24,6 +25,7 @@ export function buildApp(): FastifyInstance {
     await instance.register(badgesRoutes);
     await instance.register(questsRoutes);
     await instance.register(aiRoutes);
+    await instance.register(ttsRoutes);
   });
 
   if (process.env.NODE_ENV === "production") {

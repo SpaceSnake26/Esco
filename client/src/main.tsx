@@ -15,6 +15,15 @@ import { Ruta } from "./screens/Ruta";
 import { School } from "./screens/School";
 import { Stop } from "./screens/Stop";
 
+// A new deploy's service worker takes over in the background: reload once so nobody
+// keeps playing on a stale cached build. No reload on the very first install.
+if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!reloaded) { reloaded = true; location.reload(); }
+  });
+}
+
 const qc = new QueryClient();
 const router = createBrowserRouter([
   { path: "/", element: <RequireAuth>{(user) => <Home user={user} />}</RequireAuth> },

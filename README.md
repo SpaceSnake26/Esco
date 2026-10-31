@@ -4,7 +4,7 @@ A small, competitive, gamified **Spanish-learning PWA** for a group of friends p
 
 ## Features
 
-- **Route map** — 6 themed stops, each a ~2-week unit (40 vocab · 3 dialogues · 3 grammar notes · ~40 exercises · 2 class agendas). Unlock the next stop at 80% mastery.
+- **Route map** — 6 themed stops, each a ~2-week unit (68 vocab · 5 dialogues · 5 grammar notes · ~67 exercises · 3–4 class agendas). Unlock the next stop at 60% correct.
 - **El Reto** — a live, Kahoot-style buzzer quiz. Everyone opens one screen, anyone starts, fastest correct answer scores most.
 - **Listen & repeat** — text-to-speech pronunciation drills (Web Speech API) with a male/female voice toggle.
 - **Pablito** — an AI conversation tutor (OpenAI-compatible provider, e.g. Kimi/Moonshot), with a daily cost cap and graceful offline practice mode.

@@ -7,6 +7,7 @@ export interface PublicUser {
 export interface RegionDTO {
   id: number; order: number; slug: string; name: string; theme: string;
   status: "locked" | "current" | "complete";
+  correct: number; total: number; needed: number; // homework progress toward unlocking the next stop
 }
 export interface ExerciseDTO {
   id: number; type: "multiple_choice" | "fill_blank"; prompt: string;
@@ -67,6 +68,7 @@ export type LiveServerEvent =
 
 export type LiveClientMsg =
   | { t: "enter"; regionId: number }
+  | { t: "host:reset"; regionId: number }
   | { t: "host:create"; regionId: number }
   | { t: "join" }
   | { t: "host:start" }

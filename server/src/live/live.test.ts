@@ -192,7 +192,7 @@ test("a duplicate Start mid-game resyncs the tapper — never 'Game already star
   await Promise.all([opened(c1), opened(c2)]);
 
   // Fresh room (prior game ended): both enter.
-  const two = nextMatching(c2, (e) => e.t === "lobby" && e.players.length === 2, 4000);
+  const two = nextMatching(c2, (e) => e.t === "lobby" && e.players.length >= 2, 4000);
   c1.send(JSON.stringify({ t: "enter", regionId: ARENA }));
   await nextMatching(c1, (e) => e.t === "lobby");
   c2.send(JSON.stringify({ t: "enter", regionId: ARENA }));
@@ -212,11 +212,48 @@ test("a duplicate Start mid-game resyncs the tapper — never 'Game already star
   for (;;) {
     c1.send(JSON.stringify({ t: "answer", index: CORRECT }));
     c2.send(JSON.stringify({ t: "answer", index: WRONG }));
-    await nextMatching(c1, (e) => e.t === "reveal");
+    const rev = nextMatching(c1, (e) => e.t === "reveal");
+    c1.send(JSON.stringify({ t: "host:reveal" })); // other connected sockets never answer
+    await rev;
     const nxt = nextMatching(c1, (e) => e.t === "question" || e.t === "end");
     c1.send(JSON.stringify({ t: "host:next" }));
     if ((await nxt).t === "end") break;
   }
+});
+
+test("Play again by one player brings everyone in; reload on results keeps the question; reset works", async () => {
+  const [a, b, c] = await Promise.all([cookieFor(1, "111111"), cookieFor(2, "222222"), cookieFor(3, "333333")]);
+  const c1 = connect(a), c2 = connect(b);
+  let c3 = connect(c);
+  await Promise.all([opened(c1), opened(c2), opened(c3)]);
+
+  // Only player 1 taps: the lobby still lists every connected player.
+  const lobby = nextMatching(c3, (e) => e.t === "lobby" && e.players.length >= 3, 4000);
+  c1.send(JSON.stringify({ t: "enter", regionId: ARENA }));
+  await lobby;
+
+  const q = nextMatching(c3, (e) => e.t === "question");
+  c2.send(JSON.stringify({ t: "host:start" }));
+  await q;
+  const rev = nextMatching(c3, (e) => e.t === "reveal");
+  c1.send(JSON.stringify({ t: "host:reveal" }));
+  await rev;
+
+  // Reloading on the results screen delivers the question AND the reveal.
+  c3.close();
+  c3 = connect(c);
+  const got = [nextMatching(c3, (e) => e.t === "question", 4000), nextMatching(c3, (e) => e.t === "reveal", 4000)];
+  await opened(c3);
+  await Promise.all(got);
+
+  // Reset from the middle of a game: everyone back in a fresh lobby, and it starts.
+  const fresh = nextMatching(c2, (e) => e.t === "lobby" && e.players.length >= 3, 4000);
+  c3.send(JSON.stringify({ t: "host:reset", regionId: ARENA }));
+  await fresh;
+  const again = nextMatching(c2, (e) => e.t === "question");
+  c3.send(JSON.stringify({ t: "host:start" }));
+  expect((await again).t).toBe("question");
+  c1.send(JSON.stringify({ t: "host:reset", regionId: ARENA }));
 });
 
 test("host:reveal forces a reveal mid-question even if not all players answered", async () => {
